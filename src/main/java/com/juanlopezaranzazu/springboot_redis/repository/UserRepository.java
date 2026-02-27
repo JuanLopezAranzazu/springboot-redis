@@ -20,12 +20,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Query("SELECT u FROM User u WHERE " +
-           "(:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
-           "(:status IS NULL OR u.status = :status)")
+       "(:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', CAST(:name AS string), '%'))) AND " +
+       "(:status IS NULL OR u.status = :status)")
     Page<User> findAllWithFilters(
-            @Param("name") String name,
-            @Param("status") User.UserStatus status,
-            Pageable pageable
+        @Param("name") String name,
+        @Param("status") User.UserStatus status,
+        Pageable pageable
     );
 }
 
