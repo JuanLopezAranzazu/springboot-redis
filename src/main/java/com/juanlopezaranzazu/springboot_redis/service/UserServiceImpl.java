@@ -9,6 +9,10 @@ import com.juanlopezaranzazu.springboot_redis.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @CacheEvict(value = "usersList", allEntries = true)
     public UserResponse create(CreateUserRequest request) {
         log.debug("Creando usuario con email: {}", request.getEmail());
 
@@ -41,6 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "users", key = "#id")
     public UserResponse findById(Long id) {
         log.debug("Buscando usuario id: {} (posiblemente desde cache)", id);
 
@@ -51,6 +57,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+        value = "usersList",
+        key = "#page + '-' + #size + '-' + #name + '-' + #status"
+    )
     public PagedResponse<UserResponse> findAll(int page, int size, String name, User.UserStatus status) {
         log.debug("Listando usuarios - página: {}, tamaño: {}", page, size);
 
@@ -68,6 +78,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CachePut(value = "users", key = "#id")
+    @CacheEvict(value = "usersList", allEntries = true)
     public UserResponse update(Long id, UpdateUserRequest request) {
         log.debug("Actualizando usuario id: {}", id);
 
@@ -88,6 +100,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = {"users", "usersList"}, key = "#id", allEntries = true)
     public void delete(Long id) {
         log.debug("Eliminando usuario id: {}", id);
 

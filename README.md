@@ -18,3 +18,10 @@ Para ejecutar el proyecto, puedes usar el siguiente comando:
 ```bash
 ./mvnw spring-boot:run
 ```
+
+## Configuración de Redis
+
+Para ejecutar Redis, puedes usar Docker con el siguiente comando:
+```bash
+docker run -d --name redis-server -p 6379:6379 redis
+```
